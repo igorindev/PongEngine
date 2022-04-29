@@ -16,7 +16,7 @@ float arenaHalfSizeY = 45;
 
 float ballPositionX;
 float ballPositionY;
-float ballVelocityX = 100;
+float ballVelocityX = 130;
 float ballVelocityY = 0;
 
 float ballHalfSize = 1;
@@ -64,10 +64,21 @@ static void SimulateGame(Input* input, float dt)
 	if (PRESSED(BUTTON_UP)) { playerAcceleration += acc; }
 	if (PRESSED(BUTTON_DOWN)) { playerAcceleration -= acc; }
 
-	//Player 2
 	float player2Acceleration = 0.0f;
+#if 0 
+	//Player 2
 	if (PRESSED(BUTTON_W)) { player2Acceleration += acc; }
 	if (PRESSED(BUTTON_S)) { player2Acceleration -= acc; }
+#else 
+	//AI 1
+	//if (ballPositionY > player2Position + 2.0f) player2Acceleration += 1300;
+	//if (ballPositionY < player2Position - 2.0f) player2Acceleration -= 1300;
+
+	//AI 2
+	player2Acceleration = (ballPositionY - player2Position) * 100;
+	if (player2Acceleration > 1300) player2Acceleration = 1300;
+	if (player2Acceleration < -1300) player2Acceleration = -1300;
+#endif
 
 	SimulatePlayer(&playerPosition, &playerVelocity, playerAcceleration, dt);
 	SimulatePlayer(&player2Position, &player2Velocity, player2Acceleration, dt);
