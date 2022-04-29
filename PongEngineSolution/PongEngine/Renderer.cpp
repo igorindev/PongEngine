@@ -47,3 +47,110 @@ static void DrawRect(float x, float y, float halfSizeX, float halfSizeY, u32 col
 
 	DrawRectInPixels(x0, y0, x1, y1, color);
 }
+
+static void DrawNumbers(int number, float xPos, float yPos, float size, u32 color)
+{
+	float halfSize = size * 0.5f;
+
+	bool drewNumber = false;
+	while (!drewNumber || number)
+	{
+		drewNumber = true;
+		int digit = number % 10;
+		number = number / 10;
+
+		switch (digit)
+		{
+			case 0:
+				DrawRect(xPos - size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos, yPos + size * 2.0f, halfSize, halfSize, color);
+				DrawRect(xPos, yPos - size * 2.0f, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			break;
+			
+			case 1:
+			{
+				DrawRect(xPos + size, yPos, halfSize,2.5f * size,color);
+				xPos -= size * 2.0f;
+			}
+			break;
+			case 2:
+			{
+				DrawRect(xPos, yPos + size * 2.0f, 1.5f * size, halfSize, color);
+				DrawRect(xPos, yPos, 1.5f * size, halfSize, color);
+				DrawRect(xPos, yPos - size * 2.0f, 1.5f * size, halfSize, color);
+				DrawRect(xPos + size, yPos + size, halfSize, halfSize, color);
+				DrawRect(xPos - size, yPos - size, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 3:
+			{
+				DrawRect(xPos - halfSize, yPos + size * 2.0f, size, halfSize, color);
+				DrawRect(xPos - halfSize, yPos, size, halfSize, color);
+				DrawRect(xPos - halfSize, yPos - size * 2.0f, size, halfSize, color);
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 4:
+			{
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos - size, yPos + size, halfSize, 1.5f * size, color);
+				DrawRect(xPos, yPos, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 5:
+			{
+				DrawRect(xPos, yPos + size * 2.0f, 1.5f * size, halfSize, color);
+				DrawRect(xPos, yPos, 1.5f * size, halfSize, color);
+				DrawRect(xPos, yPos - size * 2.0f, 1.5f * size, halfSize, color);
+				DrawRect(xPos - size, yPos + size, halfSize, halfSize, color);
+				DrawRect(xPos + size, yPos - size, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 6:
+			{
+				DrawRect(xPos + halfSize, yPos + size * 2.0f, size, halfSize, color);
+				DrawRect(xPos + halfSize, yPos, size, halfSize, color);
+				DrawRect(xPos + halfSize, yPos - size * 2.0f, size, halfSize, color);
+				DrawRect(xPos - size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos + size, yPos - size, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 7:
+			{
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos - halfSize, yPos + size * 2.0f, size, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 8:
+			{
+				DrawRect(xPos - size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos, yPos + size * 2.0f, halfSize, halfSize, color);
+				DrawRect(xPos, yPos - size * 2.0f, halfSize, halfSize, color);
+				DrawRect(xPos, yPos, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			case 9:
+			{
+				DrawRect(xPos - halfSize, yPos + size * 2.0f, size, halfSize, color);
+				DrawRect(xPos - halfSize, yPos, size, halfSize, color);
+				DrawRect(xPos - halfSize, yPos - size * 2.0f, size, halfSize, color);
+				DrawRect(xPos + size, yPos, halfSize, 2.5f * size, color);
+				DrawRect(xPos - size, yPos + size, halfSize, halfSize, color);
+				xPos -= size * 4.0f;
+			}
+			break;
+			default:
+			break;
+		}
+	}
+}

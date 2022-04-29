@@ -59,13 +59,11 @@ static void SimulateGame(Input* input, float dt)
 
 	float acc = 2000; //Units per second
 
-	///////////////////////////////////////
 	//Player 1
 	float playerAcceleration = 0.0f;
 	if (PRESSED(BUTTON_UP)) { playerAcceleration += acc; }
 	if (PRESSED(BUTTON_DOWN)) { playerAcceleration -= acc; }
 
-	//////////////////////////////////////
 	//Player 2
 	float player2Acceleration = 0.0f;
 	if (PRESSED(BUTTON_W)) { player2Acceleration += acc; }
@@ -122,8 +120,10 @@ static void SimulateGame(Input* input, float dt)
 		}
 	}
 
+	DrawNumbers(player1Score, -10, 40, 1.0f, 0xbbffbb);
+	DrawNumbers(player2Score, 10, 40, 1.0f, 0xbbffbb);
+
 	//Rendering
-	// 
 	//Ball
 	DrawRect(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, 0xffffff);
 	//Player 1
