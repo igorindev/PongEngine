@@ -23,7 +23,7 @@ float ballHalfSize = 1;
 
 int player1Score, player2Score;
 
-enum class GameMode
+enum GameMode
 {
 	GM_MENU,
 	GM_GAMEPLAY
@@ -69,7 +69,6 @@ static void SimulateGame(Input* input, float dt)
 
 	if (currentGameMode == GameMode::GM_GAMEPLAY)
 	{
-
 		float acc = 2000; //Units per second
 
 		//Player 1
