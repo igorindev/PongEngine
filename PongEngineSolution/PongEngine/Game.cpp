@@ -23,6 +23,16 @@ float ballHalfSize = 1;
 
 int player1Score, player2Score;
 
+enum class GameMode
+{
+	GM_MENU,
+	GM_GAMEPLAY
+};
+
+GameMode currentGameMode;
+bool hotButton;
+bool enemyIsAI;
+
 static bool AABBvsAABB(float p1x, float p1y, float hs1x, float hs1y, float p2x, float p2y, float hs2x, float hs2y)
 {
 	return (p1x + hs1x > p2x - hs2x &&
@@ -54,91 +64,124 @@ static void SimulatePlayer(float* position, float* velocity, float acceleration,
 
 static void SimulateGame(Input* input, float dt)
 {
-	ClearScreen(0xff5500);
-	DrawRect(0, 0, 85, 45, 0xffaa33);
+	DrawRect(0, 0, arenaHalfSizeX, arenaHalfSizeY, 0xffaa33);
+	DrawArenaBorders(arenaHalfSizeX, arenaHalfSizeY, 0xff5500);
 
-	float acc = 2000; //Units per second
-
-	//Player 1
-	float playerAcceleration = 0.0f;
-	if (PRESSED(BUTTON_UP)) { playerAcceleration += acc; }
-	if (PRESSED(BUTTON_DOWN)) { playerAcceleration -= acc; }
-
-	float player2Acceleration = 0.0f;
-#if 0 
-	//Player 2
-	if (PRESSED(BUTTON_W)) { player2Acceleration += acc; }
-	if (PRESSED(BUTTON_S)) { player2Acceleration -= acc; }
-#else 
-	//AI 1
-	//if (ballPositionY > player2Position + 2.0f) player2Acceleration += 1300;
-	//if (ballPositionY < player2Position - 2.0f) player2Acceleration -= 1300;
-
-	//AI 2
-	player2Acceleration = (ballPositionY - player2Position) * 100;
-	if (player2Acceleration > 1300) player2Acceleration = 1300;
-	if (player2Acceleration < -1300) player2Acceleration = -1300;
-#endif
-
-	SimulatePlayer(&playerPosition, &playerVelocity, playerAcceleration, dt);
-	SimulatePlayer(&player2Position, &player2Velocity, player2Acceleration, dt);
-
-	//Simulate Ball
+	if (currentGameMode == GameMode::GM_GAMEPLAY)
 	{
-		ballPositionX += ballVelocityX * dt;
-		ballPositionY += ballVelocityY * dt;
 
-		//Collision
-		if (AABBvsAABB(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, 80, playerPosition, playerHalfSizeX, playerHalfSizeY))
-		{
-			ballPositionX = 80 - playerHalfSizeX - ballHalfSize;
-			ballVelocityX *= -1;
-			ballVelocityY = (ballPositionY - playerPosition) * 2 + playerVelocity * 0.75f;
+		float acc = 2000; //Units per second
+
+		//Player 1
+		float playerAcceleration = 0.0f;
+		if (PRESSED(BUTTON_UP)) { playerAcceleration += acc; }
+		if (PRESSED(BUTTON_DOWN)) { playerAcceleration -= acc; }
+
+		float player2Acceleration = 0.0f;
+		if (!enemyIsAI)
+		{		
+			//Player 2
+			if (PRESSED(BUTTON_W)) { player2Acceleration += acc; }
+			if (PRESSED(BUTTON_S)) { player2Acceleration -= acc; }
 		}
 		else
-		if (AABBvsAABB(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, -80, player2Position, playerHalfSizeX,playerHalfSizeY))
 		{
-			ballPositionX = -80 + playerHalfSizeX + ballHalfSize;
-			ballVelocityX *= -1;
-			ballVelocityY = (ballPositionY - player2Position) * 2 + player2Velocity * 0.75f;
+			//AI 1
+			//if (ballPositionY > player2Position + 2.0f) player2Acceleration += 1300;
+			//if (ballPositionY < player2Position - 2.0f) player2Acceleration -= 1300;
+
+			//AI 2
+			player2Acceleration = (ballPositionY - player2Position) * 100;
+			if (player2Acceleration > 1300) player2Acceleration = 1300;
+			if (player2Acceleration < -1300) player2Acceleration = -1300;
 		}
 
-		if (ballPositionY + ballHalfSize > arenaHalfSizeY)
+		SimulatePlayer(&playerPosition, &playerVelocity, playerAcceleration, dt);
+		SimulatePlayer(&player2Position, &player2Velocity, player2Acceleration, dt);
+
+		//Simulate Ball
 		{
-			ballPositionY = arenaHalfSizeY - ballHalfSize;
-			ballVelocityY *= -1;
-		}
-		else if (ballPositionY - ballHalfSize < -arenaHalfSizeY)
-		{
-			ballPositionY = -arenaHalfSizeY + ballHalfSize;
-			ballVelocityY *= -1;
+			ballPositionX += ballVelocityX * dt;
+			ballPositionY += ballVelocityY * dt;
+
+			//Collision
+			if (AABBvsAABB(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, 80, playerPosition, playerHalfSizeX, playerHalfSizeY))
+			{
+				ballPositionX = 80 - playerHalfSizeX - ballHalfSize;
+				ballVelocityX *= -1;
+				ballVelocityY = (ballPositionY - playerPosition) * 2 + playerVelocity * 0.75f;
+			}
+			else
+				if (AABBvsAABB(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, -80, player2Position, playerHalfSizeX, playerHalfSizeY))
+				{
+					ballPositionX = -80 + playerHalfSizeX + ballHalfSize;
+					ballVelocityX *= -1;
+					ballVelocityY = (ballPositionY - player2Position) * 2 + player2Velocity * 0.75f;
+				}
+
+			if (ballPositionY + ballHalfSize > arenaHalfSizeY)
+			{
+				ballPositionY = arenaHalfSizeY - ballHalfSize;
+				ballVelocityY *= -1;
+			}
+			else if (ballPositionY - ballHalfSize < -arenaHalfSizeY)
+			{
+				ballPositionY = -arenaHalfSizeY + ballHalfSize;
+				ballVelocityY *= -1;
+			}
+
+			//Player 1 Goal
+			if (ballPositionX + ballHalfSize > arenaHalfSizeX)
+			{
+				ballPositionY = ballPositionX = 0;
+				ballVelocityX *= -1;
+				ballVelocityY = 0;
+				player1Score++;
+			}
+			else if (ballPositionX - ballHalfSize < -arenaHalfSizeX) //Player 2 Goal
+			{
+				ballPositionY = ballPositionX = 0;
+				ballVelocityX *= -1;
+				ballVelocityY = 0;
+				player2Score++;
+			}
 		}
 
-		//Player 1 Goal
-		if (ballPositionX + ballHalfSize > arenaHalfSizeX)
-		{
-			ballPositionY = ballPositionX = 0;
-			ballVelocityX *= -1;
-			ballVelocityY = 0;
-			player1Score++;
-		}
-		else if (ballPositionX - ballHalfSize < -arenaHalfSizeX) //Player 2 Goal
-		{
-			ballPositionY = ballPositionX = 0;
-			ballVelocityX *= -1;
-			ballVelocityY = 0;
-			player2Score++;
-		}
+		DrawNumbers(player1Score, -10, 40, 1.0f, 0xbbffbb);
+		DrawNumbers(player2Score, 10, 40, 1.0f, 0xbbffbb);
+
+		//Rendering
+		//Ball
+		DrawRect(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, 0xffffff);
+		//Player 1
+		DrawRect(80, playerPosition, 2.5, 12, 0xff0000);
+		//Player 2
+		DrawRect(-80, player2Position, 2.5, 12, 0xff0000);
 	}
+	else
+	{
+		if (CLICKED(BUTTON_LEFT) || CLICKED(BUTTON_RIGHT)) {
+			hotButton = !hotButton;
+		}
 
-	DrawNumbers(player1Score, -10, 40, 1.0f, 0xbbffbb);
-	DrawNumbers(player2Score, 10, 40, 1.0f, 0xbbffbb);
+		if (CLICKED(BUTTON_ENTER))
+		{
+			currentGameMode = GM_GAMEPLAY;
+			enemyIsAI = hotButton ? 0 : 1;
+		}
 
-	//Rendering
-	//Ball
-	DrawRect(ballPositionX, ballPositionY, ballHalfSize, ballHalfSize, 0xffffff);
-	//Player 1
-	DrawRect(80, playerPosition, 2.5, 12, 0xff0000);
-	//Player 2
-	DrawRect(-80, player2Position, 2.5, 12, 0xff0000);
+		if (!hotButton)
+		{
+			DrawAText("SINGLE PLAYER", -80, -10, 1, 0xff0000);
+			DrawAText("MULTIPLAYER", 20, -10, 1, 0xaaaaaa);
+		}
+		else {
+			DrawAText("SINGLE PLAYER", -80, -10, 1, 0xaaaaaa);
+			DrawAText("MULTIPLAYER", 20, -10, 1, 0xff0000);
+		}
+
+		DrawAText("PONG ENGINE", -73, 40, 2, 0xffffff);
+		DrawAText("WATCH THE STEP BY STEP TUTORIAL ON", -73, 22, .75, 0xffffff);
+		DrawAText("YOUTUBE.COM/DANZAIDAN", -73, 15, 1.22, 0xffffff);
+	}
 }

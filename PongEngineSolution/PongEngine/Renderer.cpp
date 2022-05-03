@@ -29,6 +29,21 @@ static void DrawRectInPixels(int x0, int y0, int x1, int y1, u32 color)
 
 GLOBAL float renderScale = 0.01f;
 
+static void DrawArenaBorders(float arena_x, float arena_y, u32 color) {
+	arena_x *= renderState.height * renderScale;
+	arena_y *= renderState.height * renderScale;
+
+	int x0 = (int)((float)renderState.width * .5f - arena_x);
+	int x1 = (int)((float)renderState.width * .5f + arena_x);
+	int y0 = (int)((float)renderState.height * .5f - arena_y);
+	int y1 = (int)((float)renderState.height * .5f + arena_y);
+
+	DrawRectInPixels(0, 0, renderState.width, y0, color);
+	DrawRectInPixels(0, y1, x1, renderState.height, color);
+	DrawRectInPixels(0, y0, x0, y1, color);
+	DrawRectInPixels(x1, y0, renderState.width, renderState.height, color);
+}
+
 static void DrawRect(float x, float y, float halfSizeX, float halfSizeY, u32 color)
 {
 	x *= renderState.height * renderScale;
@@ -46,6 +61,263 @@ static void DrawRect(float x, float y, float halfSizeX, float halfSizeY, u32 col
 	int y1 = y + halfSizeY;
 
 	DrawRectInPixels(x0, y0, x1, y1, color);
+}
+
+const char* letters[][7] = {
+	" 00",
+	"0  0",
+	"0  0",
+	"0000",
+	"0  0",
+	"0  0",
+	"0  0",
+
+	"000",
+	"0  0",
+	"0  0",
+	"000",
+	"0  0",
+	"0  0",
+	"000",
+
+	" 000",
+	"0",
+	"0",
+	"0",
+	"0",
+	"0",
+	" 000",
+
+	"000",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"000",
+
+	"0000",
+	"0",
+	"0",
+	"000",
+	"0",
+	"0",
+	"0000",
+
+	"0000",
+	"0",
+	"0",
+	"000",
+	"0",
+	"0",
+	"0",
+
+	" 000",
+	"0",
+	"0",
+	"0 00",
+	"0  0",
+	"0  0",
+	" 000",
+
+	"0  0",
+	"0  0",
+	"0  0",
+	"0000",
+	"0  0",
+	"0  0",
+	"0  0",
+
+	"000",
+	" 0",
+	" 0",
+	" 0",
+	" 0",
+	" 0",
+	"000",
+
+	" 000",
+	"   0",
+	"   0",
+	"   0",
+	"0  0",
+	"0  0",
+	" 000",
+
+	"0  0",
+	"0  0",
+	"0 0",
+	"00",
+	"0 0",
+	"0  0",
+	"0  0",
+
+	"0",
+	"0",
+	"0",
+	"0",
+	"0",
+	"0",
+	"0000",
+
+	"00 00",
+	"0 0 0",
+	"0 0 0",
+	"0   0",
+	"0   0",
+	"0   0",
+	"0   0",
+
+	"00  0",
+	"0 0 0",
+	"0 0 0",
+	"0 0 0",
+	"0 0 0",
+	"0 0 0",
+	"0  00",
+
+	"0000",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0000",
+
+	" 000",
+	"0  0",
+	"0  0",
+	"000",
+	"0",
+	"0",
+	"0",
+
+	" 000 ",
+	"0   0",
+	"0   0",
+	"0   0",
+	"0 0 0",
+	"0  0 ",
+	" 00 0",
+
+	"000",
+	"0  0",
+	"0  0",
+	"000",
+	"0  0",
+	"0  0",
+	"0  0",
+
+	" 000",
+	"0",
+	"0 ",
+	" 00",
+	"   0",
+	"   0",
+	"000 ",
+
+	"000",
+	" 0",
+	" 0",
+	" 0",
+	" 0",
+	" 0",
+	" 0",
+
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	"0  0",
+	" 00",
+
+	"0   0",
+	"0   0",
+	"0   0",
+	"0   0",
+	"0   0",
+	" 0 0",
+	"  0",
+
+	"0   0 ",
+	"0   0",
+	"0   0",
+	"0 0 0",
+	"0 0 0",
+	"0 0 0",
+	" 0 0 ",
+
+	"0   0",
+	"0   0",
+	" 0 0",
+	"  0",
+	" 0 0",
+	"0   0",
+	"0   0",
+
+	"0   0",
+	"0   0",
+	" 0 0",
+	"  0",
+	"  0",
+	"  0",
+	"  0",
+
+	"0000",
+	"   0",
+	"  0",
+	" 0",
+	"0",
+	"0",
+	"0000",
+
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"0",
+
+	"   0",
+	"  0",
+	"  0",
+	" 0",
+	" 0",
+	"0",
+	"0",
+};
+
+static void DrawAText(const char* text, float x, float y, float size, u32 color) {
+	float half_size = size * .5f;
+	float original_y = y;
+
+	while (*text) {
+		if (*text != 32) {
+			const char** letter;
+			if (*text == 47) letter = letters[27];
+			else if (*text == 46) letter = letters[26];
+			else letter = letters[*text - 'A'];
+			float original_x = x;
+
+			for (int i = 0; i < 7; i++) {
+				const char* row = letter[i];
+				while (*row) {
+					if (*row == '0') {
+						DrawRect(x, y, half_size, half_size, color);
+					}
+					x += size;
+					row++;
+				}
+				y -= size;
+				x = original_x;
+			}
+		}
+		text++;
+		x += size * 6.f;
+		y = original_y;
+	}
 }
 
 static void DrawNumbers(int number, float xPos, float yPos, float size, u32 color)

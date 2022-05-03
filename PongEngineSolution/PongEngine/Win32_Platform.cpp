@@ -2,7 +2,7 @@
 #include <Windows.h>
 
 const wchar_t CLASS_NAME[] = L"Game Window Class";
-const wchar_t WINDOW_NAME[] = L"Game Window";
+const wchar_t WINDOW_NAME[] = L"Pong Ultimate";
 
 GLOBAL bool running = true;
 
@@ -55,6 +55,7 @@ LRESULT CALLBACK WindowCallback(HWND hwnd, UINT uMsg, WPARAM wPara, LPARAM lPara
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+	ShowCursor(FALSE);
 	//Create a window class
 	WNDCLASS windowClass = {};
 	windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -79,6 +80,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		hInstance,  // Instance handle
 		NULL        // Additional application data
 	);
+
+	{
+		//Fullscreen
+		SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);
+		MONITORINFO mi = { sizeof(mi) };
+		GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
+		SetWindowPos(window, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	}
+
 	if (window == NULL) return 0;
 
 	ShowWindow(window, nCmdShow);
@@ -117,10 +127,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 					bool isDown = ((message.lParam & (1 << 31)) == 0);
 
 #define PROCESS_BUTTON_STATE(b, vk)\
-case vk:\
-{\
-	input.buttonsState[b].isDown = isDown;\
-	input.buttonsState[b].changed = isDown != input.buttonsState[b].isDown;\
+case vk: {\
+input.buttonsState[b].changed = isDown != input.buttonsState[b].isDown;\
+input.buttonsState[b].isDown = isDown;\
 } break;
 
 					switch (virtualKey)
@@ -129,6 +138,9 @@ case vk:\
 						PROCESS_BUTTON_STATE(BUTTON_DOWN, VK_DOWN);
 						PROCESS_BUTTON_STATE(BUTTON_W, 'W');
 						PROCESS_BUTTON_STATE(BUTTON_S, 'S');
+						PROCESS_BUTTON_STATE(BUTTON_LEFT, VK_LEFT);
+						PROCESS_BUTTON_STATE(BUTTON_RIGHT, VK_RIGHT);
+						PROCESS_BUTTON_STATE(BUTTON_ENTER, VK_RETURN);
 					}
 				} break;
 
